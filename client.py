@@ -60,6 +60,8 @@ class Client(slixmpp.ClientXMPP):
                 await self.showContacts()
             elif(opcion == 2):
                 await self.addContact()
+            elif(opcion == 3):
+                await self.showContact()
 
     async def showContacts(self):
         user_roster = self.client_roster
@@ -91,6 +93,23 @@ class Client(slixmpp.ClientXMPP):
             print(f"Error enviando la solicitud: {err.iq['error']['text']}")
         except IqTimeout:
             print("No hay respuesta del servidor")
+
+    async def showContact(self):
+        contact_jid = input("Ingresa el JID del contacto para buscar: ")
+        user_roster = self.client_roster
+        contacts = user_roster.keys()
+        contact_list = list(contacts)
+
+        if(contact_jid not in contact_list):
+            print("El usuario no se encuentra agregado como contacto")
+        else:
+            print("Usuario: ", contact_jid)
+            user_presence = user_roster.presence(contact_jid)
+            print(user_presence)
+            for answer, presence in user_presence.items():
+                print(presence)
+                if(presence['status']):
+                    print("Estado: ", presence['status'])
 
 
 def register_user(user_jid, password):
