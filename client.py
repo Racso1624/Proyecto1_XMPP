@@ -56,6 +56,26 @@ class Client(slixmpp.ClientXMPP):
             print("8) Enviar/recibir archivos")
             opcion = int(input("Ingrese la opcion que desees:"))
 
+            if(opcion == 1):
+                await self.showContacts()
+
+    async def showContacts(self):
+        user_roster = self.client_roster
+        contacts = user_roster.keys()
+        contact_list = list(contacts)
+
+        if not contacts or contact_list[0] == self.boundjid.bare:
+            print("\nNo tienes contactos")
+            return
+        else:
+            for user in contacts:
+                print("Usuario: ", user)
+                user_presence = user_roster.presence(user)
+                for answer, presence in user_presence.items():
+                    if(presence['status']):
+                        print("Estado: ", presence['status'])
+
+
 
 def register_user(user_jid, password):
     # Se toma el jid
@@ -68,4 +88,3 @@ def register_user(user_jid, password):
         'username': jid.getNode(),
         'password': password
     })
-    
