@@ -126,8 +126,9 @@ class Client(slixmpp.ClientXMPP):
         user_chatting = True
         while user_chatting:
             message = await ainput("Escribe el mensaje: ")
+            print(message)
             if(message == "exit chat"):
-                user_chatting = True
+                user_chatting = False
                 self.contact_chat = ""
             else:
                 self.send_message(mto=contact_jid, mbody=message, mtype='chat') 
