@@ -29,6 +29,8 @@ while(True):
         password = input("Contraseña: ")
         client = Client(jid, password)
         client.connect(disable_starttls=True, use_ssl=False)
+        client.process(forever=False)
+
     elif(opcion == 3):
         print("\nEliminando cuenta del servidor")
     elif(opcion == 4):

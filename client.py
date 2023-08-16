@@ -1,8 +1,10 @@
 import xmpp
 import slixmpp
+import asyncio
 from slixmpp.exceptions import IqError, IqTimeout
 
 # Codigo del Cliente con referencia de https://slixmpp.readthedocs.io/en/latest/
+# Codigo del Cliente con referencia de https://searchcode.com/file/58168360/examples/register_account.py/
 
 class Client(slixmpp.ClientXMPP):
     def __init__(self, jid, password):
@@ -19,16 +21,18 @@ class Client(slixmpp.ClientXMPP):
         self.register_plugin('xep_0004') # Data Forms
         self.register_plugin('xep_0060') # PubSub
         self.register_plugin('xep_0066') # Out of Band Data
+        self.register_plugin('xep_0363') # HTTP File Upload
 
         self.add_event_handler("session_start", self.start)
 
-    async def start(self):
-        print("HOLA")
+    async def start(self, event):
         try:
             self.send_presence()
             await self.get_roster()
-            self.is_connected  = True
-            print("\nConectado")
+            self.is_connected = True
+            print("\nConectado al servidor")
+
+            asyncio.create_task(self.menu())
 
         except IqError as err:
             self.is_connected = False
@@ -38,6 +42,20 @@ class Client(slixmpp.ClientXMPP):
             self.is_connected = False
             print('Error: El servidor toma mucho tiempo para responder')
             self.disconnect()
+
+    async def menu(self):
+        while self.is_connected:
+            print("\nTienes las siguienes opciones disponibles para utilizar en el chat:\n")
+            print("1) Mostrar todos los contactos y su estado")
+            print("2) Agregar un usuario a los contactos")
+            print("3) Mostrar detalles de contacto de un usuario")
+            print("4) Comunicación 1 a 1 con cualquier usuario/contacto")
+            print("5) Participar en conversaciones grupales")
+            print("6) Definir mensaje de presencia")
+            print("7) Enviar/recibir notificaciones")
+            print("8) Enviar/recibir archivos")
+            opcion = int(input("Ingrese la opcion que desees:"))
+
 
 def register_user(user_jid, password):
     # Se toma el jid
