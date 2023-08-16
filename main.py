@@ -25,6 +25,10 @@ while(True):
 
     elif(opcion == 2):
         print("\nIngresando sesion")
+        jid = input("JID: ")
+        password = input("Contraseña: ")
+        client = Client(jid, password)
+        client.connect(disable_starttls=True, use_ssl=False)
     elif(opcion == 3):
         print("\nEliminando cuenta del servidor")
     elif(opcion == 4):
