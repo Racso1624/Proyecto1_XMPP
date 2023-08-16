@@ -2,6 +2,8 @@ import xmpp
 import slixmpp
 import asyncio
 from slixmpp.exceptions import IqError, IqTimeout
+from aioconsole import ainput
+from aioconsole.stream import aprint
 
 # Codigo del Cliente con referencia de https://slixmpp.readthedocs.io/en/latest/
 # Codigo del Cliente con referencia de https://searchcode.com/file/58168360/examples/register_account.py/
@@ -12,6 +14,7 @@ class Client(slixmpp.ClientXMPP):
 
         self.name = jid.split('@')[0] # Se realiza el split para el username
         self.is_connected = False
+        self.contact_chat = ""
 
         #Plugins obtenidos por ChatGPT
         self.register_plugin('xep_0030') # Service Discovery
@@ -62,6 +65,8 @@ class Client(slixmpp.ClientXMPP):
                 await self.addContact()
             elif(opcion == 3):
                 await self.showContact()
+            elif(opcion == 4):
+                await self.sendMessage()
 
     async def showContacts(self):
         user_roster = self.client_roster
@@ -111,6 +116,21 @@ class Client(slixmpp.ClientXMPP):
                 if(presence['status']):
                     print("Estado: ", presence['status'])
 
+    async def sendMessage(self):
+        contact_jid = await ainput("Ingresa el JID del contacto para enviar mensaje: ")
+        self.contact_chat = contact_jid
+
+        await aprint("Mensaje para", contact_jid.split("@")[0])
+        await aprint("Si deseas salir escribe: exit chat")
+
+        user_chatting = True
+        while user_chatting:
+            message = await ainput("Escribe el mensaje: ")
+            if(message == "exit chat"):
+                user_chatting = True
+                self.contact_chat = ""
+            else:
+                self.send_message(mto=contact_jid, mbody=message, mtype='chat') 
 
 def register_user(user_jid, password):
     # Se toma el jid
