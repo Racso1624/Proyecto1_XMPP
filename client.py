@@ -58,23 +58,39 @@ class Client(slixmpp.ClientXMPP):
 
             if(opcion == 1):
                 await self.showContacts()
+            elif(opcion == 2):
+                await self.addContact()
 
     async def showContacts(self):
         user_roster = self.client_roster
         contacts = user_roster.keys()
         contact_list = list(contacts)
 
-        if not contacts or contact_list[0] == self.boundjid.bare:
+        # Solucion brindada por ChatGPT
+        if len(contact_list) == 1 and contact_list[0] == self.boundjid.bare:
             print("\nNo tienes contactos")
             return
         else:
+            print("\nLista de usuarios")
             for user in contacts:
-                print("Usuario: ", user)
-                user_presence = user_roster.presence(user)
-                for answer, presence in user_presence.items():
-                    if(presence['status']):
-                        print("Estado: ", presence['status'])
+                if(user != self.boundjid.bare):
+                    print("Usuario: ", user)
+                    user_presence = user_roster.presence(user)
+                    print(user_presence)
+                    for answer, presence in user_presence.items():
+                        if(presence['status']):
+                            print("Estado: ", presence['status'])
 
+    async def addContact(self):
+        contact_jid = input("Ingresa el JID del contacto para agregar: ")
+        try:
+            self.send_presence_subscription(pto = contact_jid)
+            print(f"Solicitud enviada existosamente a {contact_jid}")
+            await self.get_roster()
+        except IqError as err:
+            print(f"Error enviando la solicitud: {err.iq['error']['text']}")
+        except IqTimeout:
+            print("No hay respuesta del servidor")
 
 
 def register_user(user_jid, password):
