@@ -2,12 +2,10 @@
 # Carné 20679
 # Proyecto 1
 
-import slixmpp
-import logging
+from client import *
 
-from user_register import *
 while(True):
-    print("Bienvenido al Chat")
+    print("\nBienvenido al Chat")
     print("\nTienes las siguienes opciones disponibles:\n")
     print("1) Registrar una nueva cuenta")
     print("2) Iniciar sesion con una cuenta")
@@ -20,17 +18,10 @@ while(True):
         jid = input("JID: ")
         password = input("Contraseña: ")
 
-        xmpp = RegisterUser(jid, password)
-        xmpp.register_plugin('xep_0030')  # Service Discovery
-        xmpp.register_plugin('xep_0004')  # Data Forms
-        xmpp.register_plugin('xep_0066')  # Out-of-band Data
-        xmpp.register_plugin('xep_0077')  # In-band Registration
-
-        if xmpp.connect():
-            xmpp.process(block=True)
-            print("Proceso completado")
+        if register_user(jid, password):
+            print("Registro completado")
         else:
-            print("No se pudo conectar.")
+            print("Registro no se pudo completar")
 
     elif(opcion == 2):
         print("\nIngresando sesion")
@@ -40,4 +31,4 @@ while(True):
         print("\nSaliendo del chat")
         break
     else:
-        print("\nERROR opcion no valida\nIngresa otra opcion\n")
+        print("\nERROR opcion no valida\nIngresa otra opcion")
