@@ -4,6 +4,7 @@ import asyncio
 from slixmpp.exceptions import IqError, IqTimeout
 from aioconsole import ainput
 from aioconsole.stream import aprint
+import base64
 
 # Codigo del Cliente con referencia de https://slixmpp.readthedocs.io/en/latest/
 # Codigo del Cliente con referencia de https://searchcode.com/file/58168360/examples/register_account.py/
@@ -27,6 +28,7 @@ class Client(slixmpp.ClientXMPP):
         self.register_plugin('xep_0363') # HTTP File Upload
 
         self.add_event_handler("session_start", self.start)
+        self.add_event_handler("message", self.receiveMessage)
 
     async def start(self, event):
         try:
@@ -45,6 +47,28 @@ class Client(slixmpp.ClientXMPP):
             self.is_connected = False
             print('Error: El servidor toma mucho tiempo para responder')
             self.disconnect()
+
+    async def receiveMessage(self, message):
+        if(message['type'] == "chat"):
+            contact_name = str(message['from']).split('@')[0]
+            # Codigo con algoritmo brindado por medio de ChatGPT
+            if(message['body'].startswith("file://")):
+                file_information = message['body'][7:].split("://")
+                file_extension = file_information[0]
+                file_data = file_information[1]
+
+                try:
+                    data_decoded = base64.b64decode(file_data)
+                    with open("file_received_from_" + contact_name + "." + file_extension, "wb") as file:
+                        file.write(data_decoded)
+                    print("Archivo recibido y descargado")
+                except Exception as err:
+                    print("Error al decodificar la informacion del archivo")
+            else:
+                if(contact_name == self.contact_chat.split('@')[0]):
+                    print("\nMensaje de " + contact_name + ": " + message['body'])
+                else:
+                    print("\nMensaje de otra conversacion de " + contact_name + ": " + message['body'])
 
     async def menu(self):
         while self.is_connected:
