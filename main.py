@@ -3,6 +3,7 @@
 # Proyecto 1
 
 from client import *
+from client_functions import *
 
 while(True):
     print("\nBienvenido al Chat")
