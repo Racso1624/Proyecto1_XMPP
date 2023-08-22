@@ -54,7 +54,8 @@ async def menu(self):
             path = input("Ingresa la ruta del archivo: ")
             await sendFiles(self, user_jid, path)
         elif(opcion == 9):
-            await sendMessage(self)
+            self.disconnect()
+            self.is_connected = False
 
 async def groupchatMenu(self):
     menu_var = True
@@ -94,7 +95,7 @@ async def showContacts(self):
                         if(presence['show'] == ''):
                             print("Estado: Disponible")
                         elif(presence['show'] == 'away'):
-                            print("Estado: Disponible")
+                            print("Estado: Ausente")
                         elif(presence['show'] == 'dnd'):
                             print("Estado: Ocupado")
                         elif(presence['show'] == 'xa'):
@@ -124,11 +125,18 @@ async def showContact(self):
     else:
         print("Usuario: ", contact_jid)
         user_presence = user_roster.presence(contact_jid)
-        print(user_presence)
-        for answer, presence in user_presence.items():
-            print(presence)
-            if(presence['status']):
-                print("Estado: ", presence['status'])
+        if(user_presence != {}):
+            for answer, presence in user_presence.items():
+                if(presence['show'] == ''):
+                    print("Estado: Disponible")
+                elif(presence['show'] == 'away'):
+                    print("Estado: Ausente")
+                elif(presence['show'] == 'dnd'):
+                    print("Estado: Ocupado")
+                elif(presence['show'] == 'xa'):
+                    print("Estado: No Disponible")
+        else:
+            print("Estado: Desconectado")
 
 async def sendMessage(self):
     contact_jid = await ainput("Ingresa el JID del contacto para enviar mensaje: ")
@@ -210,6 +218,32 @@ def exitChatRoom(self):
     self['xep_0045'].leave_muc(self.chatroom, self.room_nickname)
     self.chatroom = ""
     self.room_nickname = ""
+
+async def setPresence(self):
+    
+    status, status_message = presenceMenu()
+    self.status = status
+    self.status_message = status_message
+    self.send_presence(pshow=self.status, pstatus=self.status_message) 
+    await self.get_roster() 
+
+def presenceMenu():
+    print("Estados disponibles: ")
+    print("1) Disponible")
+    print("2) Ausente")
+    print("3) No Disponible")
+    print("4) Ocupado")
+    option = int(input("Ingresa el estado que desees: "))
+
+    if(option == 1):
+        return '', 'Disponible'
+    elif(option == 2):
+        return 'away', 'Ausente'
+    elif(option == 3):
+        return 'xa', 'No Disponible'
+    elif(option == 2):
+        return 'dnd', 'Ocupado'
+
 
 # Codigo con ayuda de ChatGPT
 async def sendFiles(self, contact_jid, file_path):
