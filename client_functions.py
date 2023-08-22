@@ -6,6 +6,7 @@ import xmpp
 from aioconsole import ainput
 from aioconsole.stream import aprint
 from slixmpp.exceptions import IqError, IqTimeout
+import asyncio
 
 def register_user(user_jid, password):
     # Se toma el jid
@@ -58,6 +59,7 @@ async def groupchatMenu(self):
             roomname = input("Ingresa el nombre para la sala de chat: ")
             await createChatRoom(self, roomname)
         elif(opcion == 2):
+            roomname = input("Ingresa el nombre de la sala de chat: ")
             await joinChatRoom(self)
         elif(opcion == 3):
             menu_var = False
@@ -68,7 +70,7 @@ async def showContacts(self):
     contact_list = list(contacts)
 
     # Solucion brindada por ChatGPT
-    if len(contact_list) == 1 and contact_list[0] == self.boundjid.bare:
+    if(len(contact_list) == 1 and contact_list[0] == self.boundjid.bare):
         print("\nNo tienes contactos")
         return
     else:
@@ -136,6 +138,9 @@ async def createChatRoom(self, name_room):
         name_room = f"{name_room}@conference.alumchat.xyz"
         print(name_room)
         self.plugin['xep_0045'].join_muc(name_room, self.boundjid.user)
+        
+        # Se espera debido a que de lo contrario brinda error al crearlo
+        await asyncio.sleep(1)
 
         form = self.plugin['xep_0004'].make_form(ftype='submit', title='ChatRoom Configuration')
         form['muc#roomconfig_roomname'] = name_room

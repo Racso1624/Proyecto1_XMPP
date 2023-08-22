@@ -73,32 +73,3 @@ class Client(slixmpp.ClientXMPP):
                     print("\nMensaje de " + contact_name + ": " + message['body'])
                 else:
                     print("\nMensaje de otra conversacion de " + contact_name + ": " + message['body'])
-
-    async def createChatRoom(self, name_room):
-        try:
-            print(name_room)
-            name_room = f"{name_room}@conference.alumchat.xyz"
-            print(name_room)
-            self.plugin['xep_0045'].join_muc(name_room, self.boundjid.user)
-
-            form = self.plugin['xep_0004'].make_form(ftype='submit', title='ChatRoom Configuration')
-            form['muc#roomconfig_roomname'] = name_room
-            form['muc#roomconfig_roomdesc'] = 'Sala de chat de usuario AlumChat'
-            form['muc#roomconfig_roomowners'] = [self.boundjid.user]
-            form['muc#roomconfig_maxusers'] = '50'
-            form['muc#roomconfig_publicroom'] = '1'
-            form['muc#roomconfig_persistentroom'] = '1'
-            form['muc#roomconfig_enablelogging'] = '1'
-            form['muc#roomconfig_changesubject'] = '1'
-            form['muc#roomconfig_membersonly'] = '0'
-            form['muc#roomconfig_allowinvites'] = '0'
-            form['muc#roomconfig_whois'] = 'anyone'
-
-            await self.plugin['xep_0045'].set_room_config(name_room, config=form)
-            print("Se creo la sala de chat: ", name_room)
-            self.send_message(mto=name_room, mbody="Bienvenidos a la sala: " + name_room, mtype='groupchat')
-            
-        except IqError as err:
-            print("Error para crear la sala de chat")
-        except IqTimeout:
-            print("Tiempo de espera maximo para la creacion de la sala")
