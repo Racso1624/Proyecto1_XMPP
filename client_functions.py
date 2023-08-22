@@ -7,6 +7,7 @@ from aioconsole import ainput
 from aioconsole.stream import aprint
 from slixmpp.exceptions import IqError, IqTimeout
 import asyncio
+import base64
 
 def register_user(user_jid, password):
     # Se toma el jid
@@ -31,6 +32,7 @@ async def menu(self):
         print("6) Definir mensaje de presencia")
         print("7) Enviar/recibir notificaciones")
         print("8) Enviar/recibir archivos")
+        print("9) Cerrar sesión")
         opcion = int(input("Ingrese la opcion que desees:"))
 
         if(opcion == 1):
@@ -44,6 +46,14 @@ async def menu(self):
         elif(opcion == 5):
             await groupchatMenu(self)
         elif(opcion == 6):
+            await sendMessage(self)
+        elif(opcion == 7):
+            await sendMessage(self)
+        elif(opcion == 8):
+            user_jid = input("Ingresa el JID del usuario que deseas: ")
+            path = input("Ingresa la ruta del archivo: ")
+            await sendFiles(self, user_jid, path)
+        elif(opcion == 9):
             await sendMessage(self)
 
 async def groupchatMenu(self):
@@ -200,3 +210,15 @@ def exitChatRoom(self):
     self['xep_0045'].leave_muc(self.chatroom, self.room_nickname)
     self.chatroom = ""
     self.room_nickname = ""
+
+# Codigo con ayuda de ChatGPT
+async def sendFiles(self, contact_jid, file_path):
+    file_extension = file_path.split(".")[-1]
+
+    with open(file_path, "rb") as file: 
+        file_data = file.read()
+
+    encoded_data = base64.b64encode(file_data).decode()
+    message =  message = f"file://{file_extension}://{encoded_data}" 
+
+    self.send_message(mto=contact_jid, mbody=message, mtype='chat')
