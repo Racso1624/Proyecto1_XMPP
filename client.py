@@ -33,6 +33,7 @@ class Client(slixmpp.ClientXMPP):
 
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("message", self.receiveMessage)
+        self.add_event_handler("groupchat_message", self.receivechatroomMessage)
 
     async def start(self, event):
         try:
@@ -73,3 +74,11 @@ class Client(slixmpp.ClientXMPP):
                     print("\nMensaje de " + contact_name + ": " + message['body'])
                 else:
                     print("\nMensaje de otra conversacion de " + contact_name + ": " + message['body'])
+    
+    async def receivechatroomMessage(self, message=''):
+        group_user = message['mucnick'] 
+        if group_user != self.boundjid.user:
+            if(self.chatroom in str(message['from'])):
+                print("Mensaje de " + group_user + ": " + message['body'])
+            else:
+                print("Nuevo mensaje del usuario " + group_user + " en la sala de chat " + self.chatroom.split('@')[0] + ": " + message['body'])

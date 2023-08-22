@@ -30,9 +30,8 @@ async def menu(self):
         print("4) Comunicación 1 a 1 con cualquier usuario/contacto")
         print("5) Participar en conversaciones grupales")
         print("6) Definir mensaje de presencia")
-        print("7) Enviar/recibir notificaciones")
-        print("8) Enviar/recibir archivos")
-        print("9) Cerrar sesión")
+        print("7) Enviar/recibir archivos")
+        print("8) Cerrar sesión")
         opcion = int(input("Ingrese la opcion que desees:"))
 
         if(opcion == 1):
@@ -46,14 +45,12 @@ async def menu(self):
         elif(opcion == 5):
             await groupchatMenu(self)
         elif(opcion == 6):
-            await sendMessage(self)
+            await setPresence(self)
         elif(opcion == 7):
-            await sendMessage(self)
-        elif(opcion == 8):
             user_jid = input("Ingresa el JID del usuario que deseas: ")
             path = input("Ingresa la ruta del archivo: ")
             await sendFiles(self, user_jid, path)
-        elif(opcion == 9):
+        elif(opcion == 8):
             self.disconnect()
             self.is_connected = False
 
@@ -220,7 +217,6 @@ def exitChatRoom(self):
     self.room_nickname = ""
 
 async def setPresence(self):
-    
     status, status_message = presenceMenu()
     self.status = status
     self.status_message = status_message
