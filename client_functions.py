@@ -60,7 +60,7 @@ async def groupchatMenu(self):
             await createChatRoom(self, roomname)
         elif(opcion == 2):
             roomname = input("Ingresa el nombre de la sala de chat: ")
-            await joinChatRoom(self)
+            await joinChatRoom(self, roomname)
         elif(opcion == 3):
             menu_var = False
 
@@ -79,10 +79,18 @@ async def showContacts(self):
             if(user != self.boundjid.bare):
                 print("Usuario: ", user)
                 user_presence = user_roster.presence(user)
-                print(user_presence)
-                for answer, presence in user_presence.items():
-                    if(presence['status']):
-                        print("Estado: ", presence['status'])
+                if(user_presence != {}):
+                    for answer, presence in user_presence.items():
+                        if(presence['show'] == ''):
+                            print("Estado: Disponible")
+                        elif(presence['show'] == 'away'):
+                            print("Estado: Disponible")
+                        elif(presence['show'] == 'dnd'):
+                            print("Estado: Ocupado")
+                        elif(presence['show'] == 'xa'):
+                            print("Estado: No Disponible")
+                else:
+                    print("Estado: Desconectado")
 
 async def addContact(self):
     contact_jid = input("Ingresa el JID del contacto para agregar: ")
@@ -134,9 +142,7 @@ async def sendMessage(self):
 # Codigo con ayuda de ChatGPT
 async def createChatRoom(self, name_room):
     try:
-        print(name_room)
         name_room = f"{name_room}@conference.alumchat.xyz"
-        print(name_room)
         self.plugin['xep_0045'].join_muc(name_room, self.boundjid.user)
         
         # Se espera debido a que de lo contrario brinda error al crearlo
@@ -169,18 +175,11 @@ async def createChatRoom(self, name_room):
 # Referencia de https://slixmpp.readthedocs.io/en/latest/getting_started/muc.html
 # Codigo con ayuda de ChatGPT
 async def joinChatRoom(self, name_room):
+    name_room = f"{name_room}@conference.alumchat.xyz"
     self.chatroom = name_room 
     self.room_nickname = self.boundjid.user 
 
     print("Mensajes de la sala: ")
-
-    try:
-        await self.plugin['xep_0045'].join_muc(name_room, self.room_nickname)
-    except IqError as err:
-        print(f"Error al entrar a la sala de chat: {err.iq['error']['text']}")
-    except IqTimeout:
-        print("Sin respuesta del servidor")
-        return
 
     await aprint("Mensajes de la Sala de Chat: ", self.chatroom.split("@")[0])
     await aprint("Para salir del chat escribe: exit chat")
@@ -193,7 +192,7 @@ async def joinChatRoom(self, name_room):
             self.chat = ""
             exitChatRoom(self)
         else:
-            self.send_message(self.room, message, mtype='groupchat')
+            self.send_message(self.chatroom, message, mtype='groupchat')
 
 # Referencia de https://xmpp.org/extensions/xep-0045.html#terms-rooms
 # Referencia de https://slixmpp.readthedocs.io/en/latest/getting_started/muc.html
