@@ -20,7 +20,7 @@ def register_user(user_jid, password):
     })
 
 async def menu(self):
-    while self.is_connected:
+    while(self.is_connected):
         print("\nTienes las siguienes opciones disponibles para utilizar en el chat:\n")
         print("1) Mostrar todos los contactos y su estado")
         print("2) Agregar un usuario a los contactos")
@@ -40,6 +40,26 @@ async def menu(self):
             await showContact(self)
         elif(opcion == 4):
             await sendMessage(self)
+        elif(opcion == 5):
+            await sendMessage(self)
+        elif(opcion == 6):
+            await sendMessage(self)
+
+async def groupchatMenu(self):
+    menu_var = True
+    while(menu_var):
+        print("\nTienes las siguienes opciones disponibles para utilizar en el chat:\n")
+        print("1) Crear una sala")
+        print("2) Unirse a una sala")
+        print("3) Salir")
+        opcion = int(input("Ingrese la opcion que desees:"))
+
+        if(opcion == 1):
+            await showContacts(self)
+        elif(opcion == 2):
+            await addContact(self)
+        elif(opcion == 3):
+            menu_var = False
 
 async def showContacts(self):
     user_roster = self.client_roster
@@ -105,3 +125,31 @@ async def sendMessage(self):
             self.contact_chat = ""
         else:
             self.send_message(mto=contact_jid, mbody=message, mtype='chat') 
+
+# Referencia de https://xmpp.org/extensions/xep-0045.html#terms-rooms
+# Codigo con ayuda de ChatGPT
+async def createRoom(self, name_room):
+        try:
+            self.plugin['xep_0045'].join_muc(name_room, self.boundjid.user)
+
+            form = self.plugin['xep_0004'].make_form(ftype='submit', title='ChatRoom Configuration')
+            form['muc#roomconfig_roomname'] = name_room
+            form['muc#roomconfig_roomdesc'] = 'Sala de chat de usuario AlumChat'
+            form['muc#roomconfig_roomowners'] = [self.boundjid.user]
+            form['muc#roomconfig_maxusers'] = '50'
+            form['muc#roomconfig_publicroom'] = '1'
+            form['muc#roomconfig_persistentroom'] = '1'
+            form['muc#roomconfig_enablelogging'] = '1'
+            form['muc#roomconfig_changesubject'] = '1'
+            form['muc#roomconfig_membersonly'] = '0'
+            form['muc#roomconfig_allowinvites'] = '0'
+            form['muc#roomconfig_whois'] = 'anyone'
+
+            await self.plugin['xep_0045'].set_room_config(name_room, config=form)
+            print("Se creo la sala de chat: ", name_room)
+            self.send_message(mto=name_room, mbody="Bienvenidos a la sala: " + name_room, mtype='groupchat')
+            
+        except IqError as e:
+            print("Error para crear la sala de chat")
+        except IqTimeout:
+            print("Tiempo de espera maximo para la creacion de la sala")
