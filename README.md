@@ -17,3 +17,14 @@ Se tuvieron algunas dificultades al momento de realizar el proyecto, las cuáles
 - Utilizar paquetes que lograran la conexión para Python
 - Utilizar acciones de conexión para que el usuario se lograra conectar al servidor designado
 - La forma de codificar los archivos
+- La forma de obtener la presencia de los usuarios agregados
+
+### Requerimientos:
+Los paquetes que se requieren para el funcionamiento del proyecto son los siguientes:
+```
+pip install xmpppy
+pip install slixmpp
+pip install asyncio
+pip install aioconsole
+```
+ 
