@@ -65,34 +65,46 @@ class Client(slixmpp.ClientXMPP):
     async def receiveMessage(self, message):
         # Si el mensaje es de tipo chat se toma
         if(message['type'] == "chat"):
+            # Se obtiene el nombre del contacto
             contact_name = str(message['from']).split('@')[0]
             # Codigo con algoritmo brindado por medio de ChatGPT
+            # Si el mensaje es file
             if(message['body'].startswith("file://")):
+                # Se obtiene la informacion del archivo
                 file_information = message['body'][7:].split("://")
+                # Se obtiene la extension
                 file_extension = file_information[0]
+                # Se obtienen los datos
                 file_data = file_information[1]
-
+                
+                # Se intenta decodificar
                 try:
                     data_decoded = base64.b64decode(file_data)
                     with open("file_received_from_" + contact_name + "." + file_extension, "wb") as file:
                         file.write(data_decoded)
                     print("Archivo recibido y descargado")
+                # Si no brinda error
                 except Exception as err:
                     print("Error al decodificar la informacion del archivo")
             else:
+                # Si es otro tipo de mensaje solo se muestra
                 if(contact_name == self.chat.split('@')[0]):
                     print("\nMensaje de " + contact_name + ": " + message['body'])
                 else:
                     print("\nMensaje de otra conversacion de " + contact_name + ": " + message['body'])
     
+    # Recibir mensaje de chat de grupo
     async def receivechatroomMessage(self, message=''):
+        # Se obtiene el nombre del usuario
         group_user = message['mucnick'] 
         if group_user != self.boundjid.user:
+            # Se realiza la impresion del mensaje
             if(self.chatroom in str(message['from'])):
                 print("Mensaje de " + group_user + ": " + message['body'])
             else:
                 print("Nuevo mensaje del usuario " + group_user + " en la sala de chat " + self.chatroom.split('@')[0] + ": " + message['body'])
 
+    # Menu de opciones dentro del chat
     async def menu(self):
         while(self.is_connected):
             print("\nTienes las siguienes opciones disponibles para utilizar en el chat:\n")
@@ -102,10 +114,11 @@ class Client(slixmpp.ClientXMPP):
             print("4) Comunicación 1 a 1 con cualquier usuario/contacto")
             print("5) Participar en conversaciones grupales")
             print("6) Definir mensaje de presencia")
-            print("7) Enviar/recibir archivos")
+            print("7) Enviar archivos")
             print("8) Cerrar sesión")
             opcion = int(input("Ingrese la opcion que desees:"))
 
+            # Dependiendo de la opcion se realiza una accion
             if(opcion == 1):
                 await self.showContacts()
             elif(opcion == 2):
@@ -123,11 +136,14 @@ class Client(slixmpp.ClientXMPP):
                 path = input("Ingresa la ruta del archivo: ")
                 await self.sendFiles(user_jid, path)
             elif(opcion == 8):
+                # Se desconecta para cerrar sesion
                 self.disconnect()
                 self.is_connected = False
 
+    # Menu para el groupchat
     async def groupchatMenu(self):
         menu_var = True
+        # Se pregunta la opcion deseada
         while(menu_var):
             print("\nTienes las siguienes opciones disponibles para utilizar en el chat:\n")
             print("1) Crear una sala")
@@ -135,6 +151,7 @@ class Client(slixmpp.ClientXMPP):
             print("3) Salir")
             opcion = int(input("Ingrese la opcion que desees:"))
 
+            # Se realizan las opciones de las salas de chat
             if(opcion == 1):
                 roomname = input("Ingresa el nombre para la sala de chat: ")
                 await self.createChatRoom(roomname)
@@ -144,7 +161,9 @@ class Client(slixmpp.ClientXMPP):
             elif(opcion == 3):
                 menu_var = False
 
+    # Funcion para mostrar contactos
     async def showContacts(self):
+        # Se obtienen los valores de los contactos
         user_roster = self.client_roster
         contacts = user_roster.keys()
         contact_list = list(contacts)
@@ -153,6 +172,7 @@ class Client(slixmpp.ClientXMPP):
         if(len(contact_list) == 1 and contact_list[0] == self.boundjid.bare):
             print("\nNo tienes contactos")
             return
+        # Se imprimen los contactos
         else:
             print("\nLista de usuarios")
             for user in contacts:
@@ -160,6 +180,7 @@ class Client(slixmpp.ClientXMPP):
                     print("Usuario: ", user)
                     user_presence = user_roster.presence(user)
                     if(user_presence != {}):
+                        # Se imprime el estado
                         for answer, presence in user_presence.items():
                             if(presence['show'] == ''):
                                 print("Estado: Disponible")
@@ -172,9 +193,12 @@ class Client(slixmpp.ClientXMPP):
                     else:
                         print("Estado: Desconectado")
 
+    # Se añade contactos
     async def addContact(self):
+        # Se ingresa el JID para el contacto
         contact_jid = input("Ingresa el JID del contacto para agregar: ")
         try:
+            # Se solicita
             self.send_presence_subscription(pto = contact_jid)
             print(f"Solicitud enviada existosamente a {contact_jid}")
             await self.get_roster()
@@ -183,6 +207,7 @@ class Client(slixmpp.ClientXMPP):
         except IqTimeout:
             print("No hay respuesta del servidor")
 
+    # Se muestra un contacto
     async def showContact(self):
         contact_jid = input("Ingresa el JID del contacto para buscar: ")
         user_roster = self.client_roster
