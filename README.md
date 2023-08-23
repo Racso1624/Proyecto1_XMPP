@@ -19,6 +19,12 @@ Se tuvieron algunas dificultades al momento de realizar el proyecto, las cuáles
 - La forma de codificar los archivos
 - La forma de obtener la presencia de los usuarios agregados
 
+### Lecciones Aprendidas:
+- Uso de funciones asincronas en Python
+- Uso del protocolo XMPP
+- Uso y codificación de los archivos
+- Uso de las opciones del protocolo mediante las funciones en Python
+
 ### Requerimientos:
 Los paquetes que se requieren para el funcionamiento del proyecto son los siguientes:
 ```
