@@ -12,7 +12,7 @@ Este consistió en una aplicación por medio de consola para conectarse a un ser
 - Definir presencia del usuario
 - Mostrar contactos
 
-### DificultadesÑ
+### Dificultades:
 Se tuvieron algunas dificultades al momento de realizar el proyecto, las cuáles fueronÑ
 - Utilizar paquetes que lograran la conexión para Python
 - Utilizar acciones de conexión para que el usuario se lograra conectar al servidor designado
