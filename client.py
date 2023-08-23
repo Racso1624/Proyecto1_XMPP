@@ -11,6 +11,7 @@ from aioconsole.stream import aprint
 
 # Codigo del Cliente con referencia de https://slixmpp.readthedocs.io/en/latest/
 # Codigo del Cliente con referencia de https://searchcode.com/file/58168360/examples/register_account.py/
+# https://slixmpp.readthedocs.io/en/latest/api/clientxmpp.html
 
 # Se crea la clase Cliente
 class Client(slixmpp.ClientXMPP):
@@ -209,13 +210,15 @@ class Client(slixmpp.ClientXMPP):
 
     # Se muestra un contacto
     async def showContact(self):
+        # Se ingresa el contacto y se regresa la lista
         contact_jid = input("Ingresa el JID del contacto para buscar: ")
         user_roster = self.client_roster
         contacts = user_roster.keys()
         contact_list = list(contacts)
-
+        # Se revisa que el contacto se encuentra en la lista
         if(contact_jid not in contact_list):
             print("El usuario no se encuentra agregado como contacto")
+        # Se imprime la información
         else:
             print("Usuario: ", contact_jid)
             user_presence = user_roster.presence(contact_jid)
@@ -232,13 +235,16 @@ class Client(slixmpp.ClientXMPP):
             else:
                 print("Estado: Desconectado")
 
+    # Se crea funcion para enviar mensaje
     async def sendMessage(self):
+        # Se ingresa el jid para el contacto
         contact_jid = await ainput("Ingresa el JID del contacto para enviar mensaje: ")
         self.chat = contact_jid
 
         await aprint("Mensaje para: ", contact_jid.split("@")[0])
         await aprint("Si deseas salir escribe: exit chat")
 
+        # Se hace un ciclo para mandar mensajes
         user_chatting = True
         while user_chatting:
             message = await ainput("Escribe el mensaje: ")
@@ -247,19 +253,23 @@ class Client(slixmpp.ClientXMPP):
                 user_chatting = False
                 self.chat = ""
             else:
+                # Se envia mensaje
                 self.send_message(mto=contact_jid, mbody=message, mtype='chat') 
 
     # Referencia de https://xmpp.org/extensions/xep-0045.html#terms-rooms
     # Referencia de https://slixmpp.readthedocs.io/en/latest/getting_started/muc.html
     # Codigo con ayuda de ChatGPT
+    # Se crea la clase para crear chat rooms
     async def createChatRoom(self, name_room):
         try:
+            # Se crea el chat grupal
             name_room = f"{name_room}@conference.alumchat.xyz"
             self.plugin['xep_0045'].join_muc(name_room, self.boundjid.user)
             
             # Se espera debido a que de lo contrario brinda error al crearlo
             await asyncio.sleep(1)
 
+            # Se crea el form para el chat grupal
             form = self.plugin['xep_0004'].make_form(ftype='submit', title='ChatRoom Configuration')
             form['muc#roomconfig_roomname'] = name_room
             form['muc#roomconfig_roomdesc'] = 'Sala de chat de usuario AlumChat'
@@ -273,10 +283,11 @@ class Client(slixmpp.ClientXMPP):
             form['muc#roomconfig_allowinvites'] = '0'
             form['muc#roomconfig_whois'] = 'anyone'
 
+            # Se crea la sala del chat
             await self.plugin['xep_0045'].set_room_config(name_room, config=form)
             print("Se creo la sala de chat: ", name_room)
             self.send_message(mto=name_room, mbody="Bienvenidos a la sala: " + name_room, mtype='groupchat')
-            
+        # Se imprimen los errores
         except IqError as err:
             print("Error para crear la sala de chat")
         except IqTimeout:
@@ -286,7 +297,9 @@ class Client(slixmpp.ClientXMPP):
     # Referencia de https://xmpp.org/extensions/xep-0045.html#terms-rooms
     # Referencia de https://slixmpp.readthedocs.io/en/latest/getting_started/muc.html
     # Codigo con ayuda de ChatGPT
+    # Se crea la funcion para unirse a una sala de chat
     async def joinChatRoom(self, name_room):
+        # Se ingresa el nombre de la sala
         name_room = f"{name_room}@conference.alumchat.xyz"
         self.chatroom = name_room 
         self.room_nickname = self.boundjid.user 
@@ -296,23 +309,22 @@ class Client(slixmpp.ClientXMPP):
         await aprint("Mensajes de la Sala de Chat: ", self.chatroom.split("@")[0])
         await aprint("Para salir del chat escribe: exit chat")
 
+        # Se crea el ciclo para enviar mensajes
         user_chatting = True
         while user_chatting:
             message = await ainput("Escribe el mensaje: ")
             if(message == "exit chat"):
+                # Se sale del chat room
                 user_chatting = False
                 self.chat = ""
-                self.exitChatRoom()
+                self['xep_0045'].leave_muc(self.chatroom, self.room_nickname)
+                self.chatroom = ""
+                self.room_nickname = ""
             else:
+                # Se envian mensajes
                 self.send_message(self.chatroom, message, mtype='groupchat')
 
-    # Referencia de https://xmpp.org/extensions/xep-0045.html#terms-rooms
-    # Referencia de https://slixmpp.readthedocs.io/en/latest/getting_started/muc.html
-    def exitChatRoom(self):
-        self['xep_0045'].leave_muc(self.chatroom, self.room_nickname)
-        self.chatroom = ""
-        self.room_nickname = ""
-
+    # Se utiliza la funcion para añadir la presencia
     async def setPresence(self):
         status, status_message = self.presenceMenu()
         self.status = status
@@ -320,6 +332,7 @@ class Client(slixmpp.ClientXMPP):
         self.send_presence(pshow=self.status, pstatus=self.status_message) 
         await self.get_roster() 
 
+    # Se crea el menu de presencia del usuario
     def presenceMenu():
         print("Estados disponibles: ")
         print("1) Disponible")
@@ -339,13 +352,15 @@ class Client(slixmpp.ClientXMPP):
 
 
     # Codigo con ayuda de ChatGPT
+    # Se crea la funcion para enviar archios
     async def sendFiles(self, contact_jid, file_path):
+        # Se obtienen las extensiones
         file_extension = file_path.split(".")[-1]
 
         with open(file_path, "rb") as file: 
             file_data = file.read()
-
+        # Se codifica la data del archivo
         encoded_data = base64.b64encode(file_data).decode()
         message =  message = f"file://{file_extension}://{encoded_data}" 
-
+        # Se envia la data
         self.send_message(mto=contact_jid, mbody=message, mtype='chat')
