@@ -12,10 +12,13 @@ from aioconsole.stream import aprint
 # Codigo del Cliente con referencia de https://slixmpp.readthedocs.io/en/latest/
 # Codigo del Cliente con referencia de https://searchcode.com/file/58168360/examples/register_account.py/
 
+# Se crea la clase Cliente
 class Client(slixmpp.ClientXMPP):
+    # Se hace el init
     def __init__(self, jid, password):
         super().__init__(jid, password)
 
+        # Se crean las variables globales del Cliente
         self.name = jid.split('@')[0] # Se realiza el split para el username
         self.is_connected = False
         self.chat = ""
@@ -32,12 +35,15 @@ class Client(slixmpp.ClientXMPP):
         self.register_plugin('xep_0045') # MUC
         self.register_plugin('xep_0085') # Notifications
 
+        # Se realiza el handler de los eventos que se realicen durante el chat
         self.add_event_handler("session_start", self.start)
         self.add_event_handler("message", self.receiveMessage)
         self.add_event_handler("groupchat_message", self.receivechatroomMessage)
-
+    
+    # Se crea la funcion Handler de Star
     async def start(self, event):
         try:
+            # Se conecta al server
             self.send_presence()
             await self.get_roster()
             self.is_connected = True
@@ -45,6 +51,7 @@ class Client(slixmpp.ClientXMPP):
 
             asyncio.create_task(self.menu())
 
+        # Si pasa lo contrario se brinda el error
         except IqError as err:
             self.is_connected = False
             print(f"Error: {err.iq['error']['text']}")
@@ -54,7 +61,9 @@ class Client(slixmpp.ClientXMPP):
             print('Error: El servidor toma mucho tiempo para responder')
             self.disconnect()
 
+    # Se crea la funcion Handler para recibir mensajes
     async def receiveMessage(self, message):
+        # Si el mensaje es de tipo chat se toma
         if(message['type'] == "chat"):
             contact_name = str(message['from']).split('@')[0]
             # Codigo con algoritmo brindado por medio de ChatGPT
@@ -71,7 +80,7 @@ class Client(slixmpp.ClientXMPP):
                 except Exception as err:
                     print("Error al decodificar la informacion del archivo")
             else:
-                if(contact_name == self.contact_chat.split('@')[0]):
+                if(contact_name == self.chat.split('@')[0]):
                     print("\nMensaje de " + contact_name + ": " + message['body'])
                 else:
                     print("\nMensaje de otra conversacion de " + contact_name + ": " + message['body'])
@@ -200,7 +209,7 @@ class Client(slixmpp.ClientXMPP):
 
     async def sendMessage(self):
         contact_jid = await ainput("Ingresa el JID del contacto para enviar mensaje: ")
-        self.contact_chat = contact_jid
+        self.chat = contact_jid
 
         await aprint("Mensaje para: ", contact_jid.split("@")[0])
         await aprint("Si deseas salir escribe: exit chat")
