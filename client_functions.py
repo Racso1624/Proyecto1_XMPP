@@ -3,11 +3,6 @@
 # Proyecto 1
 
 import xmpp
-from aioconsole import ainput
-from aioconsole.stream import aprint
-from slixmpp.exceptions import IqError, IqTimeout
-import asyncio
-import base64
 
 def register_user(user_jid, password):
     # Se toma el jid

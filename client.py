@@ -6,7 +6,8 @@ import slixmpp
 import asyncio
 from slixmpp.exceptions import IqError, IqTimeout
 import base64
-from client_functions import *
+from aioconsole import ainput
+from aioconsole.stream import aprint
 
 # Codigo del Cliente con referencia de https://slixmpp.readthedocs.io/en/latest/
 # Codigo del Cliente con referencia de https://searchcode.com/file/58168360/examples/register_account.py/
