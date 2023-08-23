@@ -24,7 +24,7 @@ class Client(slixmpp.ClientXMPP):
         self.is_connected = False
         self.chat = ""
         self.room_nickname = ""
-        self.chatroom = ""
+        self.room = ""
 
         #Plugins obtenidos por ChatGPT
         self.register_plugin('xep_0004') # Data Forms
@@ -100,10 +100,10 @@ class Client(slixmpp.ClientXMPP):
         group_user = message['mucnick'] 
         if group_user != self.boundjid.user:
             # Se realiza la impresion del mensaje
-            if(self.chatroom in str(message['from'])):
+            if(self.room in str(message['from'])):
                 print("Mensaje de " + group_user + ": " + message['body'])
             else:
-                print("Nuevo mensaje del usuario " + group_user + " en la sala de chat " + self.chatroom.split('@')[0] + ": " + message['body'])
+                print("Nuevo mensaje del usuario " + group_user + " en la sala de chat " + self.room.split('@')[0] + ": " + message['body'])
 
     # Menu de opciones dentro del chat
     async def menu(self):
@@ -258,16 +258,17 @@ class Client(slixmpp.ClientXMPP):
 
     # Referencia de https://xmpp.org/extensions/xep-0045.html#terms-rooms
     # Referencia de https://slixmpp.readthedocs.io/en/latest/getting_started/muc.html
+    # Referencia de https://xmpp.org/registrar/formtypes.html
     # Codigo con ayuda de ChatGPT
     # Se crea la clase para crear chat rooms
     async def createChatRoom(self, name_room):
         try:
             # Se crea el chat grupal
-            name_room = f"{name_room}@conference.alumchat.xyz"
+            name_room = name_room + "@conference.alumchat.xyz"
             self.plugin['xep_0045'].join_muc(name_room, self.boundjid.user)
             
             # Se espera debido a que de lo contrario brinda error al crearlo
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
 
             # Se crea el form para el chat grupal
             form = self.plugin['xep_0004'].make_form(ftype='submit', title='ChatRoom Configuration')
@@ -300,13 +301,20 @@ class Client(slixmpp.ClientXMPP):
     # Se crea la funcion para unirse a una sala de chat
     async def joinChatRoom(self, name_room):
         # Se ingresa el nombre de la sala
-        name_room = f"{name_room}@conference.alumchat.xyz"
-        self.chatroom = name_room 
+        name_room = name_room + "@conference.alumchat.xyz"
+        self.room = name_room 
         self.room_nickname = self.boundjid.user 
 
-        print("Mensajes de la sala: ")
+        # Unirse a la sala de chat
+        try:
+            await self.plugin['xep_0045'].join_muc(name_room, self.room_nickname)
+        except IqError as err:
+            print(f"Error al unirse {err.iq['error']['text']}")
+        except IqTimeout:
+            print("No hay respuesta del servidor")
+            return None
 
-        await aprint("Mensajes de la Sala de Chat: ", self.chatroom.split("@")[0])
+        await aprint("Mensajes de la Sala de Chat: ", name_room)
         await aprint("Para salir del chat escribe: exit chat")
 
         # Se crea el ciclo para enviar mensajes
@@ -317,12 +325,12 @@ class Client(slixmpp.ClientXMPP):
                 # Se sale del chat room
                 user_chatting = False
                 self.chat = ""
-                self['xep_0045'].leave_muc(self.chatroom, self.room_nickname)
-                self.chatroom = ""
+                self.plugin['xep_0045'].leave_muc(self.room, self.room)
+                self.room = ""
                 self.room_nickname = ""
             else:
                 # Se envian mensajes
-                self.send_message(self.chatroom, message, mtype='groupchat')
+                self.send_message(self.room, message, mtype='groupchat')
 
     # Se utiliza la funcion para añadir la presencia
     async def setPresence(self):
@@ -333,7 +341,7 @@ class Client(slixmpp.ClientXMPP):
         await self.get_roster() 
 
     # Se crea el menu de presencia del usuario
-    def presenceMenu():
+    def presenceMenu(self):
         print("Estados disponibles: ")
         print("1) Disponible")
         print("2) Ausente")
