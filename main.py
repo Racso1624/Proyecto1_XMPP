@@ -2,9 +2,12 @@
 # Carné 20679
 # Proyecto 1
 
+# Se realizan los imports
 from client import *
 from client_functions import *
+from delete_client import *
 
+# Se hace el menu principal
 while(True):
     print("\nBienvenido al Chat")
     print("\nTienes las siguienes opciones disponibles:\n")
@@ -14,6 +17,7 @@ while(True):
     print("4) Salir")
     opcion = int(input("Ingrese la opcion que desees:"))
 
+    # Opcion de crear cuenta
     if(opcion == 1):
         print("\nCreando nueva cuenta")
         jid = input("JID: ")
@@ -23,7 +27,7 @@ while(True):
             print("Registro completado")
         else:
             print("Registro no se pudo completar")
-
+    # Opcion de ingresar sesion
     elif(opcion == 2):
         print("\nIngresando sesion")
         jid = input("JID: ")
@@ -31,9 +35,13 @@ while(True):
         client = Client(jid, password)
         client.connect(disable_starttls=True, use_ssl=False)
         client.process(forever=False)
-
+    # Opcion de eliminar cuenta
     elif(opcion == 3):
         print("\nEliminando cuenta del servidor")
+        client = DeleteClient(jid, password)
+        client.connect(disable_starttls=True, use_ssl=False)
+        client.process(forever=False)
+    # Opcion de salir del chat
     elif(opcion == 4):
         print("\nSaliendo del chat")
         break
