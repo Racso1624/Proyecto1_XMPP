@@ -27,4 +27,9 @@ pip install slixmpp
 pip install asyncio
 pip install aioconsole
 ```
- 
+
+ ### Instalación del proyecto:
+ Para el uso del proyecto se puede utilizar los siguientes comandos: 
+ - Clonar el repositorio: ``` git remote add origin https://github.com/Racso1624/Proyecto1_XMPP```
+ - Abrir el repositorio: ``` cd directorio ```
+ - Ejecutar el código: ``` python main.py ```
